@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/timbarker/monkey/object"
+
+	"github.com/timbarker/monkey/evaluator"
 	"github.com/timbarker/monkey/lexer"
 	"github.com/timbarker/monkey/parser"
 )
@@ -13,6 +16,7 @@ const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	environment := object.NewEnvironment()
 
 	for {
 		fmt.Print(PROMPT)
@@ -32,8 +36,11 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		io.WriteString(out, program.String())
-		io.WriteString(out, "\n")
+		evaluated := evaluator.Eval(program, environment)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
 
